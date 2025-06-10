@@ -1,1 +1,5 @@
-/* /index.html 200
+git pull origin main
+# Save index.html and _redirects in the root directory
+git add index.html _redirects
+git commit -m "Update index.html and add _redirects for bookmarklet"
+git push origin main
