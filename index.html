@@ -1,93 +1,75 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create a free gift registry for any occasion. Add items in one click!">
+  <meta name="keywords" content="gift registry, wishlist, gift ideas, Instagram gift list">
   <title>My Gift Registry</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #f0f4f5; /* Light teal-gray for Himalayan aesthetic */
+    }
+    .btn-primary {
+      background-color: #1e3a8a; /* Deep teal inspired by Sikkim */
+      color: #fefcbf; /* Gold accent for Jataka vibe */
+    }
+    .btn-primary:hover {
+      background-color: #1e40af;
+    }
+    .text-primary {
+      color: #1e3a8a;
+    }
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #fefcbf; /* Gold border for elegance */
+    }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="font-sans">
   <div class="container mx-auto p-4 max-w-3xl">
     <!-- Header -->
-    <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Gift Registry</h1>
+    <h1 class="text-4xl font-bold text-center text-primary mb-8">Gift Registry</h1>
 
     <!-- User Setup -->
-    <div id="userSetup" class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 class="text-xl font-semibold text-gray-700 mb-4">Create Your Registry</h2>
+    <div id="userSetup" class="card p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-xl font-semibold text-primary mb-4">Create Your Registry</h2>
       <div class="space-y-4">
-        <input id="userName" type="text" placeholder="Your Name (e.g., Priya)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-        <button onclick="createRegistry()" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition">Start Your Registry</button>
+        <input id="userName" type="text" placeholder="Your Name (e.g., Priya)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+        <button onclick="createRegistry()" class="w-full btn-primary p-2 rounded-md transition">Start Your Registry</button>
       </div>
     </div>
 
     <!-- Registry Section (Hidden until user is set) -->
     <div id="registrySection" class="hidden">
       <!-- Share Link -->
-      <div class="bg-blue-100 p-4 rounded-lg mb-6 flex justify-between items-center">
-        <p id="shareLink" class="text-blue-700">Your registry: [Link will appear here]</p>
-        <button onclick="copyLink()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Copy Link</button>
+      <div class="card p-4 rounded-lg mb-6 flex justify-between items-center">
+        <p id="shareLink" class="text-primary">Your registry: [Link will appear here]</p>
+        <button onclick="copyLink()" class="btn-primary px-4 py-2 rounded-md">Copy Link</button>
       </div>
 
       <!-- Bookmarklet Instructions -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Add Gifts Easily</h2>
-        <p class="text-gray-600 mb-4">Drag this bookmarklet to your browser's bookmarks bar: <a href="javascript:(function(){var name=document.title;var url=window.location.href;window.open('https://yourmagi.netlify.app//add?user='+encodeURIComponent(localStorage.getItem('currentUser'))+'&name='+encodeURIComponent(name)+'&url='+encodeURIComponent(url),'_blank');})();" class="text-blue-500 hover:underline">Add to Gift Registry</a></p>
-        <p class="text-gray-600">When browsing a product page (e.g., Amazon), click the bookmarklet to add it to your registry.</p>
+      <div class="card p-6 rounded-lg mb-6">
+        <h2 class="text-xl font-semibold text-primary mb-4">Add Gifts Easily</h2>
+        <p class="text-gray-600 mb-4">Drag this to your bookmarks bar: <a href="javascript:(function(){var name=document.title;var url=window.location.href;window.open('https://yourmagi.netlify.app/add?user='+encodeURIComponent(localStorage.getItem('currentUser'))+'&name='+encodeURIComponent(name)+'&url='+encodeURIComponent(url),'_blank');})();" class="text-primary hover:underline">Add to Gift Registry</a></p>
+        <p class="text-gray-600">Click the bookmarklet on any product page (e.g., Amazon) to add it to your registry.</p>
       </div>
 
       <!-- Form to add gifts manually -->
-      <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Add a Gift Manually</h2>
+      <div class="card p-6 rounded-lg mb-6">
+        <h2 class="text-xl font-semibold text-primary mb-4">Add a Gift Manually</h2>
         <div class="space-y-4">
-          <input id="giftName" type="text" placeholder="Gift Name (e.g., Blue Scarf)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-          <textarea id="giftDescription" placeholder="Description (e.g., Silk scarf from Etsy)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
-          <input id="giftLink" type="url" placeholder="Product Link (e.g., https://etsy.com/...)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-          <button onclick="addGift()" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition">Add Gift to List</button>
+          <input id="giftName" type="text" placeholder="Gift Name (e.g., Blue Scarf)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+          <textarea id="giftDescription" placeholder="Description (e.g., Silk scarf from Etsy)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary" rows="3"></textarea>
+          <input id="giftLink" type="url" placeholder="Product Link (e.g., https://etsy.com/...)" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary" required>
+          <button onclick="addGift()" class="w-full btn-primary p-2 rounded-md transition">Add Gift to List</button>
         </div>
       </div>
 
       <!-- Gift list display -->
       <div id="giftList" class="space-y-4">
-        <h2 class="text-xl font-semibold text-gray-700">Your Gift List</h2>
+        <h2 class="text-xl font-semibold text-primary">Your Gift List</h2>
         <!-- Gifts will be dynamically added here -->
       </div>
     </div>
@@ -104,7 +86,6 @@
         showRegistry();
         loadGifts();
       }
-      // Check for bookmarklet parameters
       const urlParams = new URLSearchParams(window.location.search);
       const user = urlParams.get('user');
       const name = urlParams.get('name');
@@ -164,7 +145,6 @@
 
     function addGiftFromBookmarklet(name, link) {
       saveGift(name, '', link);
-      // Clear URL parameters after adding
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
@@ -176,7 +156,7 @@
 
     function loadGifts() {
       const giftList = document.getElementById('giftList');
-      giftList.innerHTML = '<h2 class="text-xl font-semibold text-gray-700">Your Gift List</h2>';
+      giftList.innerHTML = '<h2 class="text-xl font-semibold text-primary">Your Gift List</h2>';
       const gifts = JSON.parse(localStorage.getItem(`gifts_${currentUser}`)) || [];
       if (gifts.length === 0) {
         giftList.innerHTML += '<p class="text-gray-500">No gifts added yet.</p>';
@@ -184,14 +164,14 @@
       }
       gifts.forEach((gift, index) => {
         const giftCard = `
-          <div class="bg-white p-4 rounded-lg shadow-md flex justify-between items-center">
+          <div class="card p-4 rounded-lg shadow-md flex justify-between items-center">
             <div>
-              <h3 class="text-lg font-medium text-gray-800">${gift.name}</h3>
+              <h3 class="text-lg font-medium text-primary">${gift.name}</h3>
               <p class="text-gray-600">${gift.description || 'No description provided'}</p>
-              <a href="${gift.link}" target="_blank" class="text-blue-500 hover:underline">Buy this gift</a>
+              <a href="${gift.link}" target="_blank" class="text-primary hover:underline">Buy this gift</a>
               ${gift.reserved ? '<span class="text-red-500 ml-2">[Reserved]</span>' : ''}
             </div>
-            ${!gift.reserved ? `<button onclick="reserveGift(${index})" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Reserve</button>` : ''}
+            ${!gift.reserved ? `<button onclick="reserveGift(${index})" class="btn-primary px-4 py-2 rounded-md">Reserve</button>` : ''}
           </div>`;
         giftList.innerHTML += giftCard;
       });
@@ -206,3 +186,4 @@
   </script>
 </body>
 </html>
+Show in sidebar
